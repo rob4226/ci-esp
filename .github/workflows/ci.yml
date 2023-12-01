@@ -41,7 +41,7 @@ jobs:
           - release-v5.1
           - release-v5.0
           - release-v4.4
-          - release-v4.3
+          # - release-v4.3  # Doesn't support newer version of IDF component manager.
         target:
           - esp32
           - esp32s2
