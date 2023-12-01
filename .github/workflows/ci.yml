@@ -135,7 +135,7 @@ jobs:
               fi
             fi
 
-            if [ should_build_examples = "no" ]; then
+            if [ "$should_build_examples" = "no" ]; then
               echo "Nothing to build: ESP-IDF ${{ matrix.esp_idf_version }} does not support ${{ matrix.target }}"
               exit 0
             fi
