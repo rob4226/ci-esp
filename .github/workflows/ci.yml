@@ -1,4 +1,5 @@
-name: Main CI process
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Main CI Process
 on:
   workflow_dispatch:
   pull_request:
@@ -12,16 +13,6 @@ jobs:
   prepare:
     name: Prepare CI
     runs-on: ubuntu-latest
-    outputs:
-      # _ci_build_esp32:   ${{ steps.ci.outputs._ci_build_esp32 }}
-      # _ci_build_esp32c2: ${{ steps.ci.outputs._ci_build_esp32c2 }}
-      # _ci_build_esp32c3: ${{ steps.ci.outputs._ci_build_esp32c3 }}
-      # _ci_build_esp32c6: ${{ steps.ci.outputs._ci_build_esp32c6 }}
-      _ci_build_esp32h2: ${{ steps.ci.outputs._ci_build_esp32h2 }}
-      # _ci_build_esp32h4: ${{ steps.ci.outputs._ci_build_esp32h4 }}
-      # _ci_build_esp32s2: ${{ steps.ci.outputs._ci_build_esp32s2 }}
-      # _ci_build_esp32s3: ${{ steps.ci.outputs._ci_build_esp32s3 }}
-      # _ci_build_esp8266: ${{ steps.ci.outputs._ci_build_esp8266 }}
     steps:
       - id: setup_python
         name: Setup Python
@@ -40,8 +31,6 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - prepare
-    if: >-
-      ${{ needs.prepare.outputs._ci_build_esp32h2 == '' }}
     strategy:
       # run other jobs even when one job failed
       fail-fast: false
@@ -87,23 +76,25 @@ jobs:
             export CCACHE_BASEDIR="$(pwd)"
             export CCACHE_NOHASHDIR=true
 
-            # see suppot matrix at https://github.com/espressif/esp-idf#esp-idf-release-and-soc-compatibility
-            examples=
+            # Only build the example projects if the current target is supported
+            # by the current ESP-IDF version:
+            # See support matrix at https://github.com/espressif/esp-idf#esp-idf-release-and-soc-compatibility
+            should_build_examples="no"
 
             # # ESP32: all
             # if [ "${{ matrix.target }}" = "esp32" ]; then
-            #   examples="${{ needs.prepare.outputs._ci_build_esp32 }}"
+            #   should_build_examples="yes"
             # fi
 
             # # ESP32-S2: all
             # if [ "${{ matrix.target }}" = "esp32s2" ]; then
-            #   examples="${{ needs.prepare.outputs._ci_build_esp32s2 }}"
+            #   should_build_examples="yes"
             # fi
 
             # # ESP32-C3: 4.3, 4.4, 5.0, 5.1
             # if [ "${{ matrix.target }}" = "esp32c3" ]; then
             #   if [ "${{ matrix.esp_idf_version }}" != "release-v4.2" ]; then
-            #     examples="${{ needs.prepare.outputs._ci_build_esp32c3 }}"
+            #     should_build_examples="yes"
             #   fi
             # fi
 
@@ -111,7 +102,7 @@ jobs:
             # if [ "${{ matrix.target }}" = "esp32s3" ]; then
             #   if [   "${{ matrix.esp_idf_version }}" != "release-v4.2" \
             #       -a "${{ matrix.esp_idf_version }}" != "release-v4.3"]; then
-            #     examples="${{ needs.prepare.outputs._ci_build_esp32s3 }}"
+            #     should_build_examples="yes"
             #   fi
             # fi
 
@@ -120,7 +111,7 @@ jobs:
             #   if [   "${{ matrix.esp_idf_version }}" != "release-v4.2" \
             #       -a "${{ matrix.esp_idf_version }}" != "release-v4.3" \
             #       -a "${{ matrix.esp_idf_version }}" != "release-v4.4" ]; then
-            #     examples="${{ needs.prepare.outputs._ci_build_esp32c2 }}"
+            #     should_build_examples="yes"
             #   fi
             # fi
 
@@ -130,7 +121,7 @@ jobs:
             #       -a "${{ matrix.esp_idf_version }}" != "release-v4.3" \
             #       -a "${{ matrix.esp_idf_version }}" != "release-v4.4" \
             #       -a "${{ matrix.esp_idf_version }}" != "release-v5.0" ]; then
-            #     examples="${{ needs.prepare.outputs._ci_build_esp32c6 }}"
+            #     should_build_examples="yes"
             #   fi
             # fi
 
@@ -140,25 +131,29 @@ jobs:
                   -a "${{ matrix.esp_idf_version }}" != "release-v4.3" \
                   -a "${{ matrix.esp_idf_version }}" != "release-v4.4" \
                   -a "${{ matrix.esp_idf_version }}" != "release-v5.0" ]; then
-                #examples="${{ needs.prepare.outputs._ci_build_esp32h2 }}"
-                examples="any-text-so-test-will-run"
+                should_build_examples="yes"
               fi
             fi
 
-            if [ -z "${examples}" ]; then
-              echo "Nothing to build: no component supports ${{ matrix.target }} or " \
-                   "ESP-IDF ${{ matrix.esp_idf_version }} does not support ${{ matrix.target }}"
+            if [ should_build_examples == "no" ]; then
+              echo "Nothing to build: ESP-IDF ${{ matrix.esp_idf_version }} does not support ${{ matrix.target }}"
               exit 0
             fi
 
-            echo "========================================================="
-            echo "Examples to build for components:"
-            echo "========================================================="
-            echo "${examples}"
+            echo "================================================================================="
+            echo "Building example projects for target: ${{ matrix.target }} with ESP-IDF version: ${{ matrix.esp_idf_version }}"
+            echo "================================================================================="
 
-            # Already in examples folder here:
+            # Loop through each example project and build them which pulls in
+            # the local esp32_htu21d component. This will make sure this component
+            # is able to be built for each target/ESP-IDF version combination:
+            # The pwd at this point is "examples/":
             for dir in */; do
               cd ${dir}
+              echo "********************************************************************************"
+              echo "Building example project: $dir"
+              echo "For target: ${{ matrix.target }} with ESP-IDF version: ${{ matrix.esp_idf_version }}"
+              echo "********************************************************************************"
               idf.py --ccache build; res=$?; [ $res -ne 0 ] && exit $res
               rm -rf build
               cd ..
