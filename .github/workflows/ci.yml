@@ -37,11 +37,11 @@ jobs:
       # releases, see https://github.com/espressif/esp-idf#esp-idf-release-support-schedule
       matrix:
         esp_idf_version:
-          # - latest
+          - latest
           - release-v5.1
-          # - release-v5.0
-          # - release-v4.4
-          # - release-v4.3
+          - release-v5.0
+          - release-v4.4
+          - release-v4.3
         target:
           # - esp32
           # - esp32s2
@@ -150,9 +150,10 @@ jobs:
             # The pwd at this point is "examples/":
             for dir in */; do
               cd ${dir}
-              echo "********************************************************************************"
+              echo "\n\n********************************************************************************"
               echo "Building example project: $dir"
-              echo "For target: ${{ matrix.target }} with ESP-IDF version: ${{ matrix.esp_idf_version }}"
+              echo "On target: ${{ matrix.target }}"
+              echo "With ESP-IDF version: ${{ matrix.esp_idf_version }}"
               echo "********************************************************************************"
               idf.py --ccache build; res=$?; [ $res -ne 0 ] && exit $res
               rm -rf build
