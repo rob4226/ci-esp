@@ -43,12 +43,12 @@ jobs:
           - release-v4.4
           - release-v4.3
         target:
-          # - esp32
-          # - esp32s2
-          # - esp32s3
-          # - esp32c2
-          # - esp32c3
-          # - esp32c6
+          - esp32
+          - esp32s2
+          - esp32s3
+          - esp32c2
+          - esp32c3
+          - esp32c6
           - esp32h2
     steps:
       - id: checkout
@@ -81,49 +81,49 @@ jobs:
             # See support matrix at https://github.com/espressif/esp-idf#esp-idf-release-and-soc-compatibility
             should_build_examples="no"
 
-            # # ESP32: all
-            # if [ "${{ matrix.target }}" = "esp32" ]; then
-            #   should_build_examples="yes"
-            # fi
+            # ESP32: all
+            if [ "${{ matrix.target }}" = "esp32" ]; then
+              should_build_examples="yes"
+            fi
 
-            # # ESP32-S2: all
-            # if [ "${{ matrix.target }}" = "esp32s2" ]; then
-            #   should_build_examples="yes"
-            # fi
+            # ESP32-S2: all
+            if [ "${{ matrix.target }}" = "esp32s2" ]; then
+              should_build_examples="yes"
+            fi
 
-            # # ESP32-C3: 4.3, 4.4, 5.0, 5.1
-            # if [ "${{ matrix.target }}" = "esp32c3" ]; then
-            #   if [ "${{ matrix.esp_idf_version }}" != "release-v4.2" ]; then
-            #     should_build_examples="yes"
-            #   fi
-            # fi
+            # ESP32-C3: 4.3, 4.4, 5.0, 5.1
+            if [ "${{ matrix.target }}" = "esp32c3" ]; then
+              if [ "${{ matrix.esp_idf_version }}" != "release-v4.2" ]; then
+                should_build_examples="yes"
+              fi
+            fi
 
-            # # ESP32-S3: 4.4, 5.0, 5.1
-            # if [ "${{ matrix.target }}" = "esp32s3" ]; then
-            #   if [   "${{ matrix.esp_idf_version }}" != "release-v4.2" \
-            #       -a "${{ matrix.esp_idf_version }}" != "release-v4.3"]; then
-            #     should_build_examples="yes"
-            #   fi
-            # fi
+            # ESP32-S3: 4.4, 5.0, 5.1
+            if [ "${{ matrix.target }}" = "esp32s3" ]; then
+              if [   "${{ matrix.esp_idf_version }}" != "release-v4.2" \
+                  -a "${{ matrix.esp_idf_version }}" != "release-v4.3"]; then
+                should_build_examples="yes"
+              fi
+            fi
 
-            # # ESP32-C2: 5.0, 5.1
-            # if [ "${{ matrix.target }}" = "esp32c2" ]; then
-            #   if [   "${{ matrix.esp_idf_version }}" != "release-v4.2" \
-            #       -a "${{ matrix.esp_idf_version }}" != "release-v4.3" \
-            #       -a "${{ matrix.esp_idf_version }}" != "release-v4.4" ]; then
-            #     should_build_examples="yes"
-            #   fi
-            # fi
+            # ESP32-C2: 5.0, 5.1
+            if [ "${{ matrix.target }}" = "esp32c2" ]; then
+              if [   "${{ matrix.esp_idf_version }}" != "release-v4.2" \
+                  -a "${{ matrix.esp_idf_version }}" != "release-v4.3" \
+                  -a "${{ matrix.esp_idf_version }}" != "release-v4.4" ]; then
+                should_build_examples="yes"
+              fi
+            fi
 
-            # # ESP32-C6: 5.1
-            # if [ "${{ matrix.target }}" = "esp32c6" ]; then
-            #   if [   "${{ matrix.esp_idf_version }}" != "release-v4.2" \
-            #       -a "${{ matrix.esp_idf_version }}" != "release-v4.3" \
-            #       -a "${{ matrix.esp_idf_version }}" != "release-v4.4" \
-            #       -a "${{ matrix.esp_idf_version }}" != "release-v5.0" ]; then
-            #     should_build_examples="yes"
-            #   fi
-            # fi
+            # ESP32-C6: 5.1
+            if [ "${{ matrix.target }}" = "esp32c6" ]; then
+              if [   "${{ matrix.esp_idf_version }}" != "release-v4.2" \
+                  -a "${{ matrix.esp_idf_version }}" != "release-v4.3" \
+                  -a "${{ matrix.esp_idf_version }}" != "release-v4.4" \
+                  -a "${{ matrix.esp_idf_version }}" != "release-v5.0" ]; then
+                should_build_examples="yes"
+              fi
+            fi
 
             # ESP32-H2: 5.1
             if [ "${{ matrix.target }}" = "esp32h2" ]; then
